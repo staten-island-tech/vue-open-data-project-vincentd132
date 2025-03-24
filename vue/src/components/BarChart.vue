@@ -44,7 +44,7 @@ export default {
         },
         title: {
           display: true,
-          text: "Death Causes by Age Group",
+          text: "Deaths by Age Group",
         },
       },
     };

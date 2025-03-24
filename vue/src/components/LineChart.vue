@@ -44,7 +44,7 @@ export default {
         },
         title: {
           display: true,
-          text: "Death Count Over Time",
+          text: "Deaths Over Time",
         },
       },
     };
