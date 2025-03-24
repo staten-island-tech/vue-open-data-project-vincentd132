@@ -1,15 +1,15 @@
 <template>
   <div>
-    <DeathChart />
+    <DeathData />
   </div>
 </template>
 
 <script>
-import DeathChart from "./components/DeathChart.vue";
+import DeathData from "../components/DeathData.vue";
 
 export default {
   components: {
-    DeathChart,
+    DeathData,
   },
 };
 </script>
