@@ -51,7 +51,7 @@ export default {
       fetch("https://data.cityofnewyork.us/resource/jb7j-dtam.json")
         .then((response) => response.json())
         .then((data) => {
-          console.log("Fetched data:", data); // Debugging
+          console.log("Fetched data:", data); 
           isLoading.value = false;
           deathChartData.value = processDeathChart(data);
           lineChartData.value = processLineData(data);
@@ -82,7 +82,7 @@ export default {
         causeGroups[cause] += deaths;
       });
 
-      console.log("Processed Death Chart Data:", causeGroups); // Debugging
+      console.log("Processed Death Chart Data:", causeGroups); 
 
       return {
         labels: Object.keys(causeGroups),
