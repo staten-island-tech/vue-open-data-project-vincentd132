@@ -5,8 +5,29 @@
 </template>
 
 <script>
-import { onMounted, ref, watch } from "vue";
-import { Chart } from "chart.js";
+import { onMounted, ref, watch, onBeforeUnmount } from "vue";
+import {
+  Chart,
+  LineController,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+Chart.register(
+  LineController,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export default {
   props: {
@@ -14,15 +35,20 @@ export default {
   },
   setup(props) {
     const chartCanvas = ref(null);
-    let chart = null;
+    let chartInstance = null;
 
-    onMounted(() => {
+    const createChart = () => {
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+
       if (chartCanvas.value && props.data) {
-        chart = new Chart(chartCanvas.value, {
+        chartInstance = new Chart(chartCanvas.value, {
           type: "line",
           data: props.data,
           options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
               legend: {
                 position: "top",
@@ -31,17 +57,25 @@ export default {
           },
         });
       }
-    });
+    };
+
+    onMounted(createChart);
 
     watch(
       () => props.data,
       (newData) => {
-        if (chart) {
-          chart.data = newData;
-          chart.update();
+        if (newData && newData.labels.length) {
+          createChart();
         }
-      }
+      },
+      { deep: true }
     );
+
+    onBeforeUnmount(() => {
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+    });
 
     return {
       chartCanvas,
@@ -53,6 +87,7 @@ export default {
 <style scoped>
 .chart-container {
   width: 100%;
+  max-width: 800px;
   height: 500px;
 }
 </style>
