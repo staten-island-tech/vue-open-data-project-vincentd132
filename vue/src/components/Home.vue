@@ -125,13 +125,21 @@ export default {
         return { labels: [], datasets: [] };
       }
 
-      const labels = [...new Set(data.map((item) => item.race_ethnicity))];
+      const raceGroups = {};
 
-      const counts = labels.map((group) =>
-        data
-          .filter((item) => item.race_ethnicity === group)
-          .reduce((acc, item) => acc + (parseInt(item.deaths, 10) || 0), 0)
-      );
+      data.forEach((item) => {
+        const race = item.race_ethnicity || "Unknown";
+        const deaths = parseInt(item.deaths, 10) || 0;
+
+        if (!raceGroups[race]) {
+          raceGroups[race] = 0;
+        }
+
+        raceGroups[race] += deaths;
+      });
+
+      const labels = Object.keys(raceGroups);
+      const counts = Object.values(raceGroups);
 
       return {
         labels,
@@ -139,14 +147,19 @@ export default {
           {
             label: "Deaths by Race/Ethnicity",
             data: counts,
-            backgroundColor: "rgba(54, 162, 235, 0.2)",
-            borderColor: "rgba(54, 162, 235, 1)",
+            backgroundColor: [
+              "rgba(255, 99, 132, 0.6)",
+              "rgba(54, 162, 235, 0.6)",
+              "rgba(255, 206, 86, 0.6)",
+              "rgba(75, 192, 192, 0.6)",
+              "rgba(153, 102, 255, 0.6)",
+            ],
+            borderColor: "rgba(0, 0, 0, 0.2)",
             borderWidth: 1,
           },
         ],
       };
     };
-
     const showChart = (chartType) => {
       currentChart.value = chartType;
     };
