@@ -51,32 +51,37 @@ export default {
       fetch("https://data.cityofnewyork.us/resource/jb7j-dtam.json")
         .then((response) => response.json())
         .then((data) => {
+          console.log("Fetched data:", data); // Debugging
           isLoading.value = false;
           deathChartData.value = processDeathChart(data);
           lineChartData.value = processLineData(data);
           barChartData.value = processBarData(data);
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error("Error fetching data:", error);
           isLoading.value = false;
         });
     });
 
     const processDeathChart = (data) => {
-      const labels = Array.from(
-        new Set(data.map((item) => item.age_group || "Unknown"))
+      if (!data || data.length === 0) {
+        console.warn("No data available for DeathChart");
+        return { labels: [], datasets: [] };
+      }
+
+      const labels = [...new Set(data.map((item) => item.leading_cause))];
+
+      const counts = labels.map((cause) =>
+        data
+          .filter((item) => item.leading_cause === cause)
+          .reduce((acc, item) => acc + (parseInt(item.deaths, 10) || 0), 0)
       );
-      const counts = labels.map((label) => {
-        const count = data
-          .filter((item) => item.age_group === label)
-          .reduce((acc, item) => acc + (parseInt(item.count, 10) || 0), 0);
-        return count;
-      });
 
       return {
-        labels: labels,
+        labels,
         datasets: [
           {
-            label: "Death Count by Age Group",
+            label: "Deaths by Cause",
             data: counts,
             backgroundColor: "rgba(255, 99, 132, 0.2)",
             borderColor: "rgba(255, 99, 132, 1)",
@@ -87,21 +92,24 @@ export default {
     };
 
     const processLineData = (data) => {
-      const labels = Array.from(
-        new Set(data.map((item) => item.year || "Unknown"))
+      if (!data || data.length === 0) {
+        console.warn("No data available for LineChart");
+        return { labels: [], datasets: [] };
+      }
+
+      const labels = [...new Set(data.map((item) => item.year))].sort();
+
+      const deaths = labels.map((year) =>
+        data
+          .filter((item) => item.year === year)
+          .reduce((acc, item) => acc + (parseInt(item.deaths, 10) || 0), 0)
       );
-      const deaths = labels.map((label) => {
-        const deathCount = data
-          .filter((item) => item.year === label)
-          .reduce((acc, item) => acc + (parseInt(item.deaths, 10) || 0), 0);
-        return deathCount;
-      });
 
       return {
-        labels: labels,
+        labels,
         datasets: [
           {
-            label: "Deaths Over Time",
+            label: "Total Deaths Over Time",
             data: deaths,
             borderColor: "rgba(75,192,192,1)",
             backgroundColor: "rgba(75,192,192,0.2)",
@@ -112,24 +120,27 @@ export default {
     };
 
     const processBarData = (data) => {
-      const labels = Array.from(
-        new Set(data.map((item) => item.age_group || "Unknown"))
+      if (!data || data.length === 0) {
+        console.warn("No data available for BarChart");
+        return { labels: [], datasets: [] };
+      }
+
+      const labels = [...new Set(data.map((item) => item.race_ethnicity))];
+
+      const counts = labels.map((group) =>
+        data
+          .filter((item) => item.race_ethnicity === group)
+          .reduce((acc, item) => acc + (parseInt(item.deaths, 10) || 0), 0)
       );
-      const counts = labels.map((label) => {
-        const count = data
-          .filter((item) => item.age_group === label)
-          .reduce((acc, item) => acc + (parseInt(item.count, 10) || 0), 0);
-        return count;
-      });
 
       return {
-        labels: labels,
+        labels,
         datasets: [
           {
-            label: "Deaths by Age Group",
+            label: "Deaths by Race/Ethnicity",
             data: counts,
-            backgroundColor: "rgba(255, 99, 132, 0.2)",
-            borderColor: "rgba(255, 99, 132, 1)",
+            backgroundColor: "rgba(54, 162, 235, 0.2)",
+            borderColor: "rgba(54, 162, 235, 1)",
             borderWidth: 1,
           },
         ],
