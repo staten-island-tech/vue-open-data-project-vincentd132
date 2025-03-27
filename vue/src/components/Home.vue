@@ -69,28 +69,34 @@ export default {
         return { labels: [], datasets: [] };
       }
 
-      const labels = [...new Set(data.map((item) => item.leading_cause))];
+      const causeGroups = {};
 
-      const counts = labels.map((cause) =>
-        data
-          .filter((item) => item.leading_cause === cause)
-          .reduce((acc, item) => acc + (parseInt(item.deaths, 10) || 0), 0)
-      );
+      data.forEach((item) => {
+        const cause = item.leading_cause || "Unknown";
+        const deaths = parseInt(item.deaths, 10) || 0;
+
+        if (!causeGroups[cause]) {
+          causeGroups[cause] = 0;
+        }
+
+        causeGroups[cause] += deaths;
+      });
+
+      console.log("Processed Death Chart Data:", causeGroups); // Debugging
 
       return {
-        labels,
+        labels: Object.keys(causeGroups),
         datasets: [
           {
-            label: "Deaths by Cause",
-            data: counts,
-            backgroundColor: "rgba(255, 99, 132, 0.2)",
+            label: "Total Deaths by Leading Cause",
+            data: Object.values(causeGroups),
+            backgroundColor: "rgba(255, 99, 132, 0.6)",
             borderColor: "rgba(255, 99, 132, 1)",
             borderWidth: 1,
           },
         ],
       };
     };
-
     const processLineData = (data) => {
       if (!data || data.length === 0) {
         console.warn("No data available for LineChart");
@@ -196,7 +202,7 @@ export default {
 .button-container {
   display: flex;
   justify-content: center;
-  gap: 20px; /* Space between buttons */
+  gap: 25px; 
   margin-top: 20px;
   width: 100%;
 }

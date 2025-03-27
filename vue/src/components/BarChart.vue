@@ -53,3 +53,11 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.chart-container {
+  width: 100%;
+  max-width: 1200px;
+  height: 600px;
+}
+</style>
