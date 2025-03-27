@@ -1,16 +1,23 @@
 <template>
-  <div id="home">
-    <!-- Title in the top center -->
-    <h1 class="chart-title">Death Charts Visualization</h1>
+  <div id="home" class="home-container">
+    <h1 class="chart-title">
+      {{
+        currentChart === "death"
+          ? "Death Chart"
+          : currentChart === "line"
+          ? "Line Chart"
+          : "Bar Chart"
+      }}
+    </h1>
 
-    <!-- Buttons to toggle charts, centered below the title -->
     <div class="button-container">
       <button @click="showChart('death')">Show Death Chart</button>
       <button @click="showChart('line')">Show Line Chart</button>
       <button @click="showChart('bar')">Show Bar Chart</button>
     </div>
 
-    <!-- Conditional rendering of charts based on currentChart value -->
+    <div v-if="isLoading">Loading data...</div>
+
     <DeathChart v-if="currentChart === 'death'" :data="deathChartData" />
     <LineChart v-if="currentChart === 'line'" :data="lineChartData" />
     <BarChart v-if="currentChart === 'bar'" :data="barChartData" />
@@ -18,7 +25,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import DeathChart from "../components/DeathChart.vue";
 import LineChart from "../components/LineChart.vue";
 import BarChart from "../components/BarChart.vue";
@@ -30,32 +37,47 @@ export default {
     BarChart,
   },
   setup() {
-    const currentChart = ref("death"); // Default chart to show on load
-
+    const currentChart = ref("death");
+    const isLoading = ref(true);
     const deathChartData = ref({});
     const lineChartData = ref({});
     const barChartData = ref({});
+
+    watch(currentChart, (newValue) => {
+      console.log("currentChart changed to:", newValue);
+    });
 
     onMounted(() => {
       fetch("https://data.cityofnewyork.us/resource/jb7j-dtam.json")
         .then((response) => response.json())
         .then((data) => {
+          isLoading.value = false;
           deathChartData.value = processDeathChart(data);
           lineChartData.value = processLineData(data);
           barChartData.value = processBarData(data);
         })
-        .catch((error) => {
-          console.error("Error fetching API data:", error);
+        .catch(() => {
+          isLoading.value = false;
         });
     });
 
     const processDeathChart = (data) => {
+      const labels = Array.from(
+        new Set(data.map((item) => item.age_group || "Unknown"))
+      );
+      const counts = labels.map((label) => {
+        const count = data
+          .filter((item) => item.age_group === label)
+          .reduce((acc, item) => acc + (parseInt(item.count, 10) || 0), 0);
+        return count;
+      });
+
       return {
-        labels: data.map((item) => item.age_group),
+        labels: labels,
         datasets: [
           {
             label: "Death Count by Age Group",
-            data: data.map((item) => item.count),
+            data: counts,
             backgroundColor: "rgba(255, 99, 132, 0.2)",
             borderColor: "rgba(255, 99, 132, 1)",
             borderWidth: 1,
@@ -65,12 +87,22 @@ export default {
     };
 
     const processLineData = (data) => {
+      const labels = Array.from(
+        new Set(data.map((item) => item.year || "Unknown"))
+      );
+      const deaths = labels.map((label) => {
+        const deathCount = data
+          .filter((item) => item.year === label)
+          .reduce((acc, item) => acc + (parseInt(item.deaths, 10) || 0), 0);
+        return deathCount;
+      });
+
       return {
-        labels: data.map((item) => item.year),
+        labels: labels,
         datasets: [
           {
             label: "Deaths Over Time",
-            data: data.map((item) => item.deaths),
+            data: deaths,
             borderColor: "rgba(75,192,192,1)",
             backgroundColor: "rgba(75,192,192,0.2)",
             fill: true,
@@ -80,12 +112,22 @@ export default {
     };
 
     const processBarData = (data) => {
+      const labels = Array.from(
+        new Set(data.map((item) => item.age_group || "Unknown"))
+      );
+      const counts = labels.map((label) => {
+        const count = data
+          .filter((item) => item.age_group === label)
+          .reduce((acc, item) => acc + (parseInt(item.count, 10) || 0), 0);
+        return count;
+      });
+
       return {
-        labels: data.map((item) => item.age_group),
+        labels: labels,
         datasets: [
           {
             label: "Deaths by Age Group",
-            data: data.map((item) => item.count),
+            data: counts,
             backgroundColor: "rgba(255, 99, 132, 0.2)",
             borderColor: "rgba(255, 99, 132, 1)",
             borderWidth: 1,
@@ -94,13 +136,13 @@ export default {
       };
     };
 
-    // Function to set the chart to be displayed
     const showChart = (chartType) => {
       currentChart.value = chartType;
     };
 
     return {
       currentChart,
+      isLoading,
       deathChartData,
       lineChartData,
       barChartData,
@@ -111,40 +153,47 @@ export default {
 </script>
 
 <style scoped>
-/* Center the title at the top */
-.chart-title {
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
   text-align: center;
-  font-size: 2em;
-  margin-top: 20px;
-  font-family: "Arial", sans-serif;
+  padding: 20px;
 }
 
-/* Center the buttons below the title */
+.chart-title {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
 .button-container {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 20px; /* Space between buttons */
   margin-top: 20px;
+  width: 100%;
 }
 
-/* Button styling */
-button {
-  padding: 10px 20px;
-  font-size: 16px;
+.button-container button {
+  padding: 15px 25px;
+  font-size: 18px;
+  cursor: pointer;
+  border: none;
   background-color: #4caf50;
   color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
   transition: background-color 0.3s ease;
 }
 
-button:hover {
+.button-container button:hover {
   background-color: #45a049;
 }
 
-/* Optional: Add some margin to the charts to create space */
 .chart-container {
-  margin-top: 40px;
+  width: 80%;
+  height: 600px;
+  margin-top: 30px;
 }
 </style>
