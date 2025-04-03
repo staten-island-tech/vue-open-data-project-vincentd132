@@ -13,7 +13,6 @@
     <div class="button-container">
       <button @click="showChart('death')">Show Death Chart</button>
       <button @click="showChart('line')">Show Line Chart</button>
-      <button @click="showChart('bar')">Show Bar Chart</button>
     </div>
 
     <div v-if="isLoading">Loading data...</div>
