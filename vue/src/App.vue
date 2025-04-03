@@ -1,5 +1,9 @@
 <template>
   <div id="app">
+    <header class="app-header">
+      <h1>Deaths in NYC</h1>
+    </header>
+
     <Home />
   </div>
 </template>
@@ -32,6 +36,18 @@ body {
 }
 
 .home-container {
+  width: 100%;
+}
+
+.app-header {
+  color: black;
+  text-align: center;
+  padding: 20px 0;
+  font-size: 24px;
+}
+
+.home-container {
+  flex-grow: 1;
   width: 100%;
 }
 </style>
