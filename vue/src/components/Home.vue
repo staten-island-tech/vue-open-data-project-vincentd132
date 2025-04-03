@@ -51,11 +51,11 @@ export default {
       fetch("https://data.cityofnewyork.us/resource/jb7j-dtam.json")
         .then((response) => response.json())
         .then((data) => {
-          console.log("Fetched data:", data); 
+          console.log("Fetched data:", data);
           isLoading.value = false;
           deathChartData.value = processDeathChart(data);
           lineChartData.value = processLineData(data);
-          barChartData.value = processBarData(data);
+          barChartData.value = processRaceData(data);
         })
         .catch((error) => {
           console.error("Error fetching data:", error);
@@ -82,7 +82,7 @@ export default {
         causeGroups[cause] += deaths;
       });
 
-      console.log("Processed Death Chart Data:", causeGroups); 
+      console.log("Processed Death Chart Data:", causeGroups);
 
       return {
         labels: Object.keys(causeGroups),
@@ -127,7 +127,7 @@ export default {
 
     const processBarData = (data) => {
       if (!data || data.length === 0) {
-        console.warn("No data available for BarChart");
+        console.warn("No data available for Race/Ethnicity Chart");
         return { labels: [], datasets: [] };
       }
 
@@ -202,7 +202,7 @@ export default {
 .button-container {
   display: flex;
   justify-content: center;
-  gap: 25px; 
+  gap: 25px;
   margin-top: 20px;
   width: 100%;
 }
