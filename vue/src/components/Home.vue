@@ -55,7 +55,7 @@ export default {
           isLoading.value = false;
           deathChartData.value = processDeathChart(data);
           lineChartData.value = processLineData(data);
-          barChartData.value = processRaceData(data);
+          barChartData.value = processBarData(data);
         })
         .catch((error) => {
           console.error("Error fetching data:", error);
