@@ -124,59 +124,58 @@ export default {
         ],
       };
     };
-
     const processBarData = (data) => {
       if (!data || data.length === 0) {
-        console.warn("No data available for Race/Ethnicity Chart");
+        console.warn("No data available for Disease and Race/Ethnicity Chart");
         return { labels: [], datasets: [] };
       }
 
-      const raceGroups = {};
+      const diseaseRaceGroups = {};
 
       data.forEach((item) => {
+        const disease = item.leading_cause || "Unknown";
         const race = item.race_ethnicity || "Unknown";
         const deaths = parseInt(item.deaths, 10) || 0;
 
-        if (!raceGroups[race]) {
-          raceGroups[race] = 0;
+        if (!diseaseRaceGroups[disease]) {
+          diseaseRaceGroups[disease] = {};
         }
 
-        raceGroups[race] += deaths;
+        if (!diseaseRaceGroups[disease][race]) {
+          diseaseRaceGroups[disease][race] = 0;
+        }
+
+        diseaseRaceGroups[disease][race] += deaths;
       });
 
-      const labels = Object.keys(raceGroups);
-      const counts = Object.values(raceGroups);
+      const raceLabels = [];
+      const datasets = [];
+
+      Object.values(diseaseRaceGroups).forEach((raceGroup) => {
+        Object.keys(raceGroup).forEach((race) => {
+          if (!raceLabels.includes(race)) {
+            raceLabels.push(race);
+          }
+        });
+      });
+      raceLabels.sort();
+
+      Object.entries(diseaseRaceGroups).forEach(([disease, raceGroup]) => {
+        const dataPoints = raceLabels.map((race) => raceGroup[race] || 0);
+
+        datasets.push({
+          label: disease,
+          data: dataPoints,
+          backgroundColor: "rgba(75, 192, 192, 0.6)",
+          borderColor: "rgba(0, 0, 0, 0.2)",
+          borderWidth: 1,
+        });
+      });
 
       return {
-        labels,
-        datasets: [
-          {
-            label: "Deaths by Race/Ethnicity",
-            data: counts,
-            backgroundColor: [
-              "rgba(255, 99, 132, 0.6)",
-              "rgba(54, 162, 235, 0.6)",
-              "rgba(255, 206, 86, 0.6)",
-              "rgba(75, 192, 192, 0.6)",
-              "rgba(153, 102, 255, 0.6)",
-            ],
-            borderColor: "rgba(0, 0, 0, 0.2)",
-            borderWidth: 1,
-          },
-        ],
+        labels: raceLabels,
+        datasets: datasets,
       };
-    };
-    const showChart = (chartType) => {
-      currentChart.value = chartType;
-    };
-
-    return {
-      currentChart,
-      isLoading,
-      deathChartData,
-      lineChartData,
-      barChartData,
-      showChart,
     };
   },
 };

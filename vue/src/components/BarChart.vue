@@ -44,7 +44,7 @@ export default {
         },
         title: {
           display: true,
-          text: "Deaths by Age Group",
+          text: "Deaths by Races",
         },
       },
     };
